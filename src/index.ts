@@ -5,6 +5,8 @@ import type { Request, Response } from 'express';
 
 import express from 'express';
 import fileUpload from 'express-fileupload';
+import lodash from 'lodash';
+
 import ProgImage from './ProgImage';
 
 type UploadedFile = fileUpload.UploadedFile;
@@ -18,45 +20,58 @@ app.use(
     tempFileDir: '/tmp/',
   })
 );
+app.use(express.urlencoded());
 
 /**
  * Root, not needed
  */
 app.get('/', (_: Request, res: Response): void => {
-  res.send('ProgImage');
+  res.send(
+    '<form method="post" action="/image" enctype="multipart/form-data"><input type="file" accept="image/*" /><input type="submit" /></form>' +
+      '<form method="get" action="/image"><input type="text" name="id" /><input type="submit" /></form>'
+  );
 });
 
 /**
  * POST /image
  * Stores the image and then returns the ID afterwards
  */
-app.post('/image', (req: Request, res: Response): void => {
-  const file = <UploadedFile>Object.values(req.files)[0];
-  console.log(file);
-
+app.post('/image', async (req: Request, res: Response): Promise<void> => {
+  console.log(req.body);
+  console.log(req.files);
+  const file = <UploadedFile>lodash.first(Object.values(req.files));
   if (file != null) {
-    const id = ProgImage.store(file);
-    res.json({ id });
-    return;
+    try {
+      const id = await ProgImage.store(file);
+      res.status(201).json({ id });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  } else {
+    res.status(404).json({ error: 'No file found' });
   }
-
-  res.send('No file found');
 });
 
 /**
  * GET image?id=ID_OF_FILE
  * Retrieves an image based on the ID passed in
  */
-app.get('/image', (req: Request, res: Response): void => {
-  console.log(req.query);
+app.get('/image', async (req: Request, res: Response): Promise<void> => {
   const fileID = req.query.id;
   if (fileID == null) {
-    res.json({ error: 'Image with id not found' });
+    res.status(400).json({ error: `Image ID not specified` });
     return;
   }
-  assert(typeof fileID === 'string');
-  const image = ProgImage.retrieve(<string>fileID);
-  res.sendFile(image.path);
+
+  if (typeof fileID !== 'string') {
+    res.status(501).json({ error: 'ID must be of type string' });
+  }
+  try {
+    const file = await ProgImage.retrieve(<string>fileID);
+    res.status(200).sendFile(file.path);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 app.listen(PORT, (): void => {

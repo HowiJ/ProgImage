@@ -4,6 +4,9 @@ import type fileUpload from 'express-fileupload';
 
 import { v4 as uuid } from 'uuid';
 import fs from 'fs';
+import lodash from 'lodash';
+
+const fsAsync = fs.promises;
 
 type UploadedFile = fileUpload.UploadedFile;
 
@@ -13,39 +16,37 @@ export type File = {
   path: string;
 };
 
+export const BASE_PATH = `${__dirname}/uploads/`;
+
 /**
- * Deals with the storing and the retrieval of the image
+ * Deals with the storing and the retrieval of files
+ * Currently just storing in memory but if we were to use
+ * a storage type such as mongodb, we would implement it here.
+ *
+ * Images are stored in fileSystem and instead can be changed to
+ * storing in aws or something instead. Mongodb would just store the
+ * pathways of the images.
  */
 class Storage {
-  collection: { [key in ID]: File } = {
-    'b7126cfd-3ce3-45bf-9960-b08eeb7309f9': {
-      id: 'b7126cfd-3ce3-45bf-9960-b08eeb7309f9',
-      mimeType: 'image/png',
-      path: `${__dirname}/uploads/837153.png`,
-    },
-  };
+  collection: { [key in ID]: File } = {};
 
   /**
    * Takes an image, stores it and returns the ID
    */
-  store(image: UploadedFile): ID {
+  async store(image: UploadedFile): Promise<ID> {
     const id = uuid();
 
-    fs.readFile(image.tempFilePath, (_: Error, data: Buffer) => {
-      const newPath = `${__dirname}/uploads/${image.name}`;
-      fs.writeFile(newPath, data, (err: Error): void => {
-        if (err) {
-          console.warn(err);
-        }
-      });
+    const data = await fsAsync.readFile(image.tempFilePath);
+    const ext = lodash.last(image.name.split('.'));
+    const newPath = `${__dirname}/uploads/${id}.${ext}`;
+    await fsAsync.writeFile(newPath, data);
 
-      const file = {
-        id,
-        mimeType: image.mimetype,
-        path: newPath,
-      };
-      this.collection[id] = file;
-    });
+    const file = {
+      id,
+      mimeType: image.mimetype,
+      path: newPath,
+    };
+    this.collection[id] = file;
 
     return id;
   }
