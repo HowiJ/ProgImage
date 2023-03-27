@@ -20,15 +20,14 @@ app.use(
     tempFileDir: '/tmp/',
   })
 );
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 /**
  * Root, not needed
  */
 app.get('/', (_: Request, res: Response): void => {
   res.send(
-    '<form method="post" action="/image" enctype="multipart/form-data"><input type="file" accept="image/*" /><input type="submit" /></form>' +
-      '<form method="get" action="/image"><input type="text" name="id" /><input type="submit" /></form>'
+    '<form method="get" action="/image"><input type="text" name="id" /><input type="submit" /></form>'
   );
 });
 
@@ -39,7 +38,13 @@ app.get('/', (_: Request, res: Response): void => {
 app.post('/image', async (req: Request, res: Response): Promise<void> => {
   console.log(req.body);
   console.log(req.files);
-  const file = <UploadedFile>lodash.first(Object.values(req.files));
+  let file = null;
+  try {
+    file = <UploadedFile>lodash.first(Object.values(req.files));
+  } catch (e) {
+    res.status(400).json({ error: 'File is required but not found' });
+    return;
+  }
   if (file != null) {
     try {
       const id = await ProgImage.store(file);
