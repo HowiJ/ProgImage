@@ -36,8 +36,6 @@ app.get('/', (_: Request, res: Response): void => {
  * Stores the image and then returns the ID afterwards
  */
 app.post('/image', async (req: Request, res: Response): Promise<void> => {
-  console.log(req.body);
-  console.log(req.files);
   let file = null;
   try {
     file = <UploadedFile>lodash.first(Object.values(req.files));

@@ -4,7 +4,7 @@ import type { File } from './Storage';
 import type { UploadedFile } from 'express-fileupload';
 
 import Jimp from 'jimp';
-import _ from 'lodash';
+import lodash from 'lodash';
 import Storage, { BASE_PATH } from './Storage';
 
 const supportedFileTypes = new Set(['jpg', 'png', 'bmp', 'tiff']);
@@ -24,6 +24,10 @@ class ProgImage {
    * @returns Promise<ID>
    */
   static async store(file: UploadedFile): Promise<ID> {
+    const fileType = lodash.last(file.name.split('.'));
+    if (!supportedFileTypes.has(fileType)) {
+      throw new Error('filetype not supported');
+    }
     return await Storage.store(file);
   }
 

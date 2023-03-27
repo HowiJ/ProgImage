@@ -27,7 +27,7 @@
   "scripts": {
     "build": "babel --extensions .ts src/ -d dist",
     "start": "yarn run build && nodemon dist/index.js",
-    "test": "jest"
+    "test": "jest $(find . -type f -name '*.test.ts')"
   },
   "author": "",
   "license": "ISC"

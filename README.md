@@ -11,8 +11,11 @@
 ## Manual Testing
 * See Routes, `POST /images` will return you the ID of the image
 
-## Automated Tests
+## Jest Tests
 1. `npm run test`
+2. This should run all tests that follow the convention of `*.test.js`
+* This may not work if you're not on a bash based terminal due to it using `find`
+* If so, all tests are currently in `src/__tests__`
 
 ## Instructions for Use
 ### Web
