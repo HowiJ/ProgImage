@@ -14,7 +14,7 @@
 ### Jest Tests
 1. `npm run test`
 2. This should run all tests that follow the convention of `*.test.js`
-* This may not work if you're not on a bash based terminal due to it using `find`
+* This may not work if `find` doesn't work
 * If so, all tests are currently in `src/__tests__`
 
 ## Instructions for Use
