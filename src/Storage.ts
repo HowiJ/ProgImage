@@ -38,6 +38,7 @@ class Storage {
 
     const data = await fsAsync.readFile(image.tempFilePath);
     const ext = lodash.last(image.name.split('.'));
+    await fsAsync.mkdir(`${__dirname}/uploads`, { recursive: true });
     const newPath = `${__dirname}/uploads/${id}.${ext}`;
     await fsAsync.writeFile(newPath, data);
 
