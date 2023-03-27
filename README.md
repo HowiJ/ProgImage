@@ -7,11 +7,11 @@
 ### Manual Build
 * `npm run build` if you would want to manually run build
 
-### Testing
-## Manual Testing
+## Testing
+### Manual Testing
 * See Routes, `POST /images` will return you the ID of the image
 
-## Jest Tests
+### Jest Tests
 1. `npm run test`
 2. This should run all tests that follow the convention of `*.test.js`
 * This may not work if you're not on a bash based terminal due to it using `find`
